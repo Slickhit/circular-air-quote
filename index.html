@@ -202,13 +202,36 @@ f.addEventListener("submit",function(ev){ev.preventDefault();
     page:location.href.split("#")[0],referrer:document.referrer||"",utm_source:qs.get("utm_source")||"",utm_medium:qs.get("utm_medium")||"",utm_campaign:qs.get("utm_campaign")||"",utm_content:qs.get("utm_content")||"",fbclid:qs.get("fbclid")?"yes":"",
     secondsOnPage:Math.round((Date.now()-started)/1000),website:"",id:sid};
   document.getElementById("smsLink").href="sms:+14072888281?&body="+encodeURIComponent(smsBody(p));
-  var url=window.LEAD_FORM_ENDPOINT;
-  if(!url){show("fail");return}
+  // Email (FormSubmit) is first-class. Thank-you shows only if that post succeeds.
+  // Apps Script is optional and extra: it runs when LEAD_FORM_ENDPOINT is set, and never decides the screen.
+  var emailUrl=window.LEAD_EMAIL_ENDPOINT||"";
+  var sheetUrl=window.LEAD_FORM_ENDPOINT||"";
+  if(!emailUrl){show("fail");return}
   go.disabled=true;go.textContent=lang==="es"?"Enviando…":"Sending…";
-  var body=JSON.stringify(p);
-  fetch(url,{method:"POST",body:body,redirect:"follow"}).then(function(r){return r.json()}).then(function(j){if(j&&j.ok)show("done");else throw new Error("bad")})
-  .catch(function(){ // CORS/opaque fallback: Apps Script still receives the POST
-    fetch(url,{method:"POST",mode:"no-cors",body:body}).then(function(){show("done")}).catch(function(){go.disabled=false;go.textContent=lang==="es"?ES.go:EN.go;show("fail")})});
+  function postSheet(){
+    if(!sheetUrl)return;
+    var body=JSON.stringify(p);
+    fetch(sheetUrl,{method:"POST",body:body,redirect:"follow"}).catch(function(){
+      fetch(sheetUrl,{method:"POST",mode:"no-cors",body:body}).catch(function(){});
+    });
+  }
+  var mail={
+    Name:p.name, Phone:p.phone, "ZIP or City":p.location, "What do you need?":p.need,
+    "System age":p.age||"", "Best time to call":p.bestTime, Notes:p.notes||"", Language:p.lang,
+    Source:"Website form", utm_campaign:p.utm_campaign||"", utm_source:p.utm_source||"",
+    utm_medium:p.utm_medium||"", utm_content:p.utm_content||"", "From FB click?":p.fbclid||"",
+    Page:p.page, Referrer:p.referrer||"", "Seconds on page":String(p.secondsOnPage), "Submission ID":p.id,
+    _subject:"New Circular Air quote request — "+p.name, _template:"table", _captcha:"false", _honey:""
+  };
+  fetch(emailUrl,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(mail)})
+    .then(function(r){return r.json()}).then(function(j){
+      if(!(j&&(j.success===true||j.success==="true")))throw new Error((j&&j.message)||"bad");
+      postSheet();
+      show("done");
+    }).catch(function(){
+      postSheet();
+      go.disabled=false;go.textContent=lang==="es"?ES.go:EN.go;show("fail");
+    });
 });
 })();
 </script>
