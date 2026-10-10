@@ -45,6 +45,9 @@ textarea{min-height:76px;resize:vertical}
 .bad input,.bad select{border-color:#b3261e}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .submit{margin-top:18px;width:100%;border:0;background:var(--orange);color:#fff;font:inherit;font-weight:800;font-size:1.1rem;padding:15px;border-radius:12px;cursor:pointer;box-shadow:0 6px 18px rgba(254,82,1,.35)}
+.submit:focus-visible,.lang:focus-visible,.callmini:focus-visible,.bigcall:focus-visible,.alt:focus-visible{outline:3px solid var(--green-dk);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
+@media (max-width:360px){.top img{height:36px}.callmini{padding:7px 9px;font-size:.78rem}.hero h1{font-size:1.6rem}.chips{grid-template-columns:1fr}}
 .submit:disabled{opacity:.7;cursor:wait}
 .small{font-size:.8rem;color:var(--muted);margin:10px 0 0;text-align:center}
 .or{text-align:center;margin:16px 0 0;font-size:.95rem}
@@ -82,31 +85,31 @@ footer a{color:var(--green)}
 
     <div class="fld" data-f="name">
       <label for="name" data-i18n="lName">Name</label>
-      <input id="name" name="name" type="text" autocomplete="name" required maxlength="80">
-      <div class="err" data-i18n="eName">Please enter your name.</div>
+      <input id="name" name="name" type="text" autocomplete="name" required maxlength="80" aria-describedby="nameErr">
+      <div class="err" id="nameErr" data-i18n="eName">Please enter your name.</div>
     </div>
 
     <div class="fld" data-f="phone">
       <label for="phone" data-i18n="lPhone">Phone</label>
-      <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required maxlength="20" placeholder="(407) 000-0000">
-      <div class="err" data-i18n="ePhone">Please enter a 10-digit phone number.</div>
+      <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required maxlength="20" placeholder="(407) 000-0000" aria-describedby="phoneErr">
+      <div class="err" id="phoneErr" data-i18n="ePhone">Please enter a 10-digit phone number.</div>
     </div>
 
     <div class="fld" data-f="location">
       <label for="location" data-i18n="lLoc">ZIP or City</label>
-      <input id="location" name="location" type="text" autocomplete="postal-code" required maxlength="60" placeholder="34741 or Kissimmee">
-      <div class="err" data-i18n="eLoc">Please enter your ZIP or city.</div>
+      <input id="location" name="location" type="text" autocomplete="postal-code" required maxlength="60" placeholder="34741 or Kissimmee" aria-describedby="locErr">
+      <div class="err" id="locErr" data-i18n="eLoc">Please enter your ZIP or city.</div>
     </div>
 
     <div class="fld" data-f="need">
       <label data-i18n="lNeed" id="needL">What do you need?</label>
-      <div class="chips" role="radiogroup" aria-labelledby="needL">
+      <div class="chips" role="radiogroup" aria-labelledby="needL" aria-required="true" aria-describedby="needErr">
         <input type="radio" name="need" id="n1" value="New AC system / replacement"><label for="n1" data-i18n="n1">New AC system / replacement</label>
         <input type="radio" name="need" id="n2" value="Repair"><label for="n2" data-i18n="n2">Repair</label>
         <input type="radio" name="need" id="n3" value="Maintenance"><label for="n3" data-i18n="n3">Maintenance</label>
         <input type="radio" name="need" id="n4" value="Other"><label for="n4" data-i18n="n4">Other</label>
       </div>
-      <div class="err" data-i18n="eNeed">Please pick one.</div>
+      <div class="err" id="needErr" data-i18n="eNeed">Please pick one.</div>
     </div>
 
     <div class="fld" data-f="age">
@@ -124,14 +127,14 @@ footer a{color:var(--green)}
 
     <div class="fld" data-f="bestTime">
       <label for="bestTime" data-i18n="lTime">Best time to call</label>
-      <select id="bestTime" name="bestTime" required>
+      <select id="bestTime" name="bestTime" required aria-describedby="timeErr">
         <option value="" data-i18n="aPick">Select…</option>
         <option value="ASAP" data-i18n="b1">As soon as possible</option>
         <option value="Morning (8-12)" data-i18n="b2">Morning (8–12)</option>
         <option value="Afternoon (12-5)" data-i18n="b3">Afternoon (12–5)</option>
         <option value="Evening (5-8)" data-i18n="b4">Evening (5–8)</option>
       </select>
-      <div class="err" data-i18n="eTime">Please pick a time.</div>
+      <div class="err" id="timeErr" data-i18n="eTime">Please pick a time.</div>
     </div>
 
     <div class="fld" data-f="notes">
@@ -142,6 +145,7 @@ footer a{color:var(--green)}
     <div class="hp" aria-hidden="true"><label for="website">Website</label><input id="website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
 
     <button class="submit" type="submit" id="go" data-i18n="go">Get My Free Quote</button>
+    <p class="sr" id="formStatus" role="status" aria-live="polite"></p>
     <p class="small" data-i18n="privacy">We only use your info to contact you about your quote. No spam.</p>
     <p class="or"><span data-i18n="orCall">Prefer to talk now?</span> <a href="tel:+14072888281">407-288-8281</a></p>
     <p class="fine" data-i18n="fine">*Price varies by home size and system.</p>
@@ -188,10 +192,10 @@ var phone=document.getElementById("phone");
 phone.addEventListener("input",function(){var d=phone.value.replace(/\D/g,"");if(d.length===11&&d[0]==="1")d=d.slice(1);if(d.length===10)phone.value="("+d.slice(0,3)+") "+d.slice(3,6)+"-"+d.slice(6)});
 function val(n){var e=f.elements[n];return e?(e.value||"").trim():""}
 function need(){var c=f.querySelector("input[name=need]:checked");return c?c.value:""}
-function mark(k,ok){var el=f.querySelector('[data-f="'+k+'"]');el.classList.toggle("bad",!ok);return ok}
+function mark(k,ok){var el=f.querySelector('[data-f="'+k+'"]');el.classList.toggle("bad",!ok);el.querySelectorAll("input:not([type=radio]),select").forEach(function(i){i.setAttribute("aria-invalid",ok?"false":"true")});var g=el.querySelector("[role=radiogroup]");if(g)g.setAttribute("aria-invalid",ok?"false":"true");return ok}
 function validate(){var d=val("phone").replace(/\D/g,"");if(d.length===11&&d[0]==="1")d=d.slice(1);
   var r=[mark("name",val("name").length>=2),mark("phone",d.length===10),mark("location",val("location").length>=3),mark("need",!!need()),mark("bestTime",!!val("bestTime"))];
-  var first=f.querySelector(".bad");if(first){var i=first.querySelector("input,select");if(i)i.focus()}return r.indexOf(false)<0}
+  var first=f.querySelector(".bad");document.getElementById("formStatus").textContent=first?(lang==="es"?"Revise los campos marcados.":"Please fix the highlighted fields."):"";if(first){var i=first.querySelector("input,select");if(i)i.focus()}return r.indexOf(false)<0}
 f.querySelectorAll("input,select").forEach(function(i){i.addEventListener("change",function(){var p=i.closest(".fld");if(p&&p.classList.contains("bad"))validate()})});
 function show(id){f.style.display="none";document.getElementById(id).style.display="block";window.scrollTo({top:0,behavior:"smooth"})}
 function smsBody(p){return "Free AC quote request\nName: "+p.name+"\nPhone: "+p.phone+"\nZIP/City: "+p.location+"\nNeed: "+p.need+(p.age?"\nSystem age: "+p.age:"")+"\nBest time: "+p.bestTime+(p.notes?"\nNotes: "+p.notes:"")}
@@ -207,6 +211,7 @@ f.addEventListener("submit",function(ev){ev.preventDefault();
   var emailUrl=window.LEAD_EMAIL_ENDPOINT||"";
   var sheetUrl=window.LEAD_FORM_ENDPOINT||"";
   if(!emailUrl){show("fail");return}
+  if(go.disabled)return;
   go.disabled=true;go.textContent=lang==="es"?"Enviando…":"Sending…";
   function postSheet(){
     if(!sheetUrl)return;
@@ -223,12 +228,14 @@ f.addEventListener("submit",function(ev){ev.preventDefault();
     Page:p.page, Referrer:p.referrer||"", "Seconds on page":String(p.secondsOnPage), "Submission ID":p.id,
     _subject:"New Circular Air quote request — "+p.name, _template:"table", _captcha:"false", _honey:""
   };
-  fetch(emailUrl,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(mail)})
-    .then(function(r){return r.json()}).then(function(j){
+  var ctl=window.AbortController?new AbortController():null,tmr=setTimeout(function(){if(ctl)ctl.abort()},15000);
+  fetch(emailUrl,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(mail),signal:ctl?ctl.signal:undefined})
+    .then(function(r){clearTimeout(tmr);if(!r.ok)throw new Error("http "+r.status);return r.json()}).then(function(j){
       if(!(j&&(j.success===true||j.success==="true")))throw new Error((j&&j.message)||"bad");
       postSheet();
       show("done");
     }).catch(function(){
+      clearTimeout(tmr);
       postSheet();
       go.disabled=false;go.textContent=lang==="es"?ES.go:EN.go;show("fail");
     });
