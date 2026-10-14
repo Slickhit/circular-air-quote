@@ -216,9 +216,8 @@ f.addEventListener("submit",function(ev){ev.preventDefault();
   function postSheet(){
     if(!sheetUrl)return;
     var body=JSON.stringify(p);
-    fetch(sheetUrl,{method:"POST",body:body,redirect:"follow"}).catch(function(){
-      fetch(sheetUrl,{method:"POST",mode:"no-cors",body:body}).catch(function(){});
-    });
+    // Apps Script: text/plain + no-cors = simple request, no CORS preflight. Response is opaque (fire-and-forget).
+    fetch(sheetUrl,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:body,keepalive:true}).catch(function(){});
   }
   var mail={
     Name:p.name, Phone:p.phone, "ZIP or City":p.location, "What do you need?":p.need,
