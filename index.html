@@ -225,7 +225,7 @@ f.addEventListener("submit",function(ev){ev.preventDefault();
     Source:"Website form", utm_campaign:p.utm_campaign||"", utm_source:p.utm_source||"",
     utm_medium:p.utm_medium||"", utm_content:p.utm_content||"", "From FB click?":p.fbclid||"",
     Page:p.page, Referrer:p.referrer||"", "Seconds on page":String(p.secondsOnPage), "Submission ID":p.id,
-    _subject:"New Circular Air quote request — "+p.name, _template:"table", _captcha:"false", _honey:""
+    _subject:"New Circular Air quote request — "+p.name, _template:"table", _captcha:"false", _honey:"", _cc:"info@circularairfl.com,Osirisenergyinc@gmail.com"
   };
   var ctl=window.AbortController?new AbortController():null,tmr=setTimeout(function(){if(ctl)ctl.abort()},15000);
   fetch(emailUrl,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(mail),signal:ctl?ctl.signal:undefined})
