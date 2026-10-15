@@ -1,5 +1,7 @@
 # Lead tracker hookup (Apps Script) — click-only steps for Raf
 
+**Time:** about 10 minutes. **You need:** to be signed in to the Google account that owns the Lead Tracker sheet.
+
 Nothing is deployed yet. Leads are still emailed (FormSubmit) either way; this adds a row to the tracker.
 
 1. Open the **Circular Air — Lead Tracker** Google Sheet in your Drive (signed in as the Drive owner account).
@@ -21,3 +23,10 @@ Notes
 - The script uses the bound sheet. If you ever run it unbound, set Script property `SHEET_ID`.
 - First real lead creates the **Form Leads** tab (schema columns + `received_at` + `source_tag`). The **Leads** tab keeps its existing 15 columns so the Scorecard keeps working.
 - If you later edit the code, use **Deploy > Manage deployments > Edit > New version** so the URL stays the same.
+
+## Until you do this
+`LEAD_FORM_ENDPOINT` is blank, so the form skips the sheet step and still emails every lead. Nothing breaks.
+
+## If something goes wrong
+- **No row appears:** check that the deployment's access is **Anyone** (not "Anyone with Google account"), and that you pasted the `/exec` URL, not `/dev`.
+- **Turn it off:** set line 3 of `config.js` back to `""`. Leads keep arriving by email.
