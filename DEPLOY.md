@@ -2,13 +2,13 @@
 
 **Time:** about 10 minutes. **You need:** to be signed in to the Google account that owns the Lead Tracker sheet.
 
-Nothing is deployed yet. Leads are still emailed (FormSubmit) either way; this adds a row to the tracker.
+Nothing is deployed yet. Prefer a terminal? See [apps-script/DEPLOY-CLASP.md](apps-script/DEPLOY-CLASP.md) (clasp). To check the live endpoint with a fake, clearly marked lead, run `ENDPOINT=<exec URL> scripts/send-test-lead.sh`. Leads are still emailed (FormSubmit) either way; this adds a row to the tracker.
 
 1. Open the **Circular Air — Lead Tracker** Google Sheet in your Drive (signed in as the Drive owner account).
 2. Menu **Extensions > Apps Script**.
 3. In `Code.gs`, select all, delete, and paste the whole of [`apps-script/Code.gs`](apps-script/Code.gs). Click **Save** (disk icon).
 4. Optional: gear icon **Project Settings** > tick **Show "appsscript.json"** > open it, paste [`apps-script/appsscript.json`](apps-script/appsscript.json), Save.
-5. Optional sanity test: function dropdown > `testSubmit` > **Run**. Approve permissions (Advanced > Go to project > Allow). A `TEST — delete` row appears on **Leads** and **Form Leads**; delete both rows.
+5. Optional sanity test: function dropdown > `testSubmit` > **Run**. Approve permissions (Advanced > Go to project > Allow). A `TEST LEAD - IRONHAUL` row appears on **Leads** and **Form Leads**; delete both rows.
 6. **Deploy > New deployment** > gear > **Web app**. Execute as: **Me**. Who has access: **Anyone**. Click **Deploy**, approve permissions if asked.
 7. Copy the **Web app URL** (ends in `/exec`).
 8. On GitHub open `config.js` on the branch you'll publish (pencil icon) and paste it on **line 3**, between the quotes:

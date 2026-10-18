@@ -193,9 +193,10 @@ function json_(o) {
   return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
 }
 
-/** Editor test: Run > testSubmit. Adds a 'TEST — delete' row you then delete by hand. */
+/** Editor test: Run > testSubmit. Adds a 'TEST LEAD - IRONHAUL' row (fake data) you then delete by hand. */
 function testSubmit() {
-  var res = doPost({ postData: { contents: JSON.stringify({ name: 'TEST — delete', phone: '4070000000', location: '34741',
-    need: 'Repair', bestTime: 'ASAP', secondsOnPage: 30, notes: 'TEST — delete this row', id: 'test-' + Date.now() }) } });
+  var res = doPost({ postData: { contents: JSON.stringify({ name: 'TEST LEAD - IRONHAUL', phone: '4075550100', location: '34741',
+    need: 'Repair', bestTime: 'ASAP', secondsOnPage: 30, utm_campaign: 'ironhaul-test',
+    notes: 'TEST LEAD - IRONHAUL | email: ironhaul-test@example.com | fake data, delete this row', id: 'test-' + Date.now() }) } });
   Logger.log(res.getContent());
 }

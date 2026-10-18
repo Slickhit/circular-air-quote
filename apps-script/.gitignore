@@ -1,0 +1,4 @@
+# Real clasp project file (copy from .clasp.json.example). Keep it local.
+.clasp.json
+# clasp credentials must never be committed.
+.clasprc.json
