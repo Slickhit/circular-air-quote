@@ -1,5 +1,5 @@
 // Apps Script Web App URL (writes to the Circular Air Lead Tracker).
-// Empty until set-endpoint.sh is run. Quote requests are still captured by email.
+// PASTE the Web app URL (ends in /exec) between the quotes below. Quote requests are still captured by email.
 window.LEAD_FORM_ENDPOINT = "";
 
 // FormSubmit AJAX endpoint. Random alias so the inbox address is not in this file.
