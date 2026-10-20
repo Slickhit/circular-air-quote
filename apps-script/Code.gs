@@ -30,7 +30,9 @@ var CONFIG = {
 // lead_intake.schema.json fields, then timestamp + source tag + form extras.
 var RAW_HEADERS = ['received_at', 'source_tag', 'id', 'created_at', 'lead_source', 'name', 'phone', 'location', 'need',
   'system_age', 'best_time', 'notes', 'lang', 'urgency', 'in_area', 'consent_to_contact', 'utm_source', 'utm_medium',
-  'utm_campaign', 'utm_content', 'fbclid_present', 'page', 'referrer', 'status', 'owner_notes', 'seconds_on_page', 'leads_row'];
+  'utm_campaign', 'utm_content', 'fbclid_present', 'page', 'referrer', 'status', 'owner_notes', 'seconds_on_page', 'leads_row',
+  // R-030 (appended at the end so existing columns never shift): consent wording shown + timestamps.
+  'consent_text', 'consent_client_at', 'consent_at'];
 
 var JOB_MAP = { 'New AC system / replacement': 'Replace', 'Repair': 'Repair', 'Maintenance': 'Maintenance', 'Other': 'Other' };
 var NEEDS = Object.keys(JOB_MAP);
@@ -93,9 +95,12 @@ function parse_(e) {
   try { p = JSON.parse(raw); } catch (_) { p = (e && e.parameter) || {}; }
   var out = {};
   ['name', 'phone', 'location', 'need', 'age', 'bestTime', 'notes', 'lang', 'page', 'referrer', 'utm_source',
-   'utm_medium', 'utm_campaign', 'utm_content', 'fbclid', 'secondsOnPage', 'website', 'id'].forEach(function (k) {
-    out[k] = clean_(p[k], k === 'notes' ? 800 : 200);
+   'utm_medium', 'utm_campaign', 'utm_content', 'fbclid', 'secondsOnPage', 'website', 'id', 'consentText', 'consentAt'].forEach(function (k) {
+    out[k] = clean_(p[k], k === 'notes' || k === 'consentText' ? 800 : 200);
   });
+  // Consent is true ONLY when the visitor ticked the box (JSON boolean true or the string "true"). Never defaulted.
+  out.consent = p.consent === true || p.consent === 'true';
+  if (!out.consent) out.consentAt = '';
   return out;
 }
 
@@ -156,6 +161,13 @@ function rawSheet_(ss) {
     sh.getRange(1, 1, 1, RAW_HEADERS.length).setValues([RAW_HEADERS]).setFontWeight('bold')
       .setBackground('#025A29').setFontColor('#ffffff');
     sh.setFrozenRows(1);
+  } else {
+    // Header migration for tabs created before new columns existed: fill only BLANK header cells
+    // at the end; never rename or move an existing header.
+    var cur = sh.getRange(1, 1, 1, RAW_HEADERS.length).getValues()[0];
+    for (var i = 0; i < RAW_HEADERS.length; i++) {
+      if (cur[i] === '' || cur[i] === undefined || cur[i] === null) sh.getRange(1, i + 1).setValue(RAW_HEADERS[i]);
+    }
   }
   return sh;
 }
@@ -166,9 +178,11 @@ function appendRaw_(ss, p, leadsRow) {
     received_at: Utilities.formatDate(now, CONFIG.TZ, 'yyyy-MM-dd HH:mm:ss'), source_tag: CONFIG.SOURCE_TAG,
     id: p.id, created_at: now.toISOString(), lead_source: 'website_form', name: p.name, phone: '+1' + digits_(p.phone),
     location: p.location, need: p.need, system_age: p.age, best_time: p.bestTime, notes: p.notes, lang: p.lang === 'es' ? 'es' : 'en',
-    urgency: '', in_area: 'unknown', consent_to_contact: true, utm_source: p.utm_source, utm_medium: p.utm_medium,
+    urgency: '', in_area: 'unknown', consent_to_contact: p.consent === true, utm_source: p.utm_source, utm_medium: p.utm_medium,
     utm_campaign: p.utm_campaign, utm_content: p.utm_content, fbclid_present: p.fbclid === 'yes', page: p.page,
-    referrer: p.referrer, status: 'new', owner_notes: '', seconds_on_page: p.secondsOnPage, leads_row: leadsRow
+    referrer: p.referrer, status: 'new', owner_notes: '', seconds_on_page: p.secondsOnPage, leads_row: leadsRow,
+    consent_text: p.consentText, consent_client_at: p.consent === true ? p.consentAt : '',
+    consent_at: p.consent === true ? now.toISOString() : ''
   };
   var sh = rawSheet_(ss);
   sh.getRange(sh.getLastRow() + 1, 1, 1, RAW_HEADERS.length).setNumberFormat('@')
