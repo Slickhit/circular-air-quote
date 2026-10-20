@@ -43,6 +43,7 @@ textarea{min-height:76px;resize:vertical}
 .err{color:#b3261e;font-size:.85rem;margin-top:5px;display:none}
 .bad .err{display:block}
 .bad input,.bad select{border-color:#b3261e}
+.consent{display:flex;gap:10px;align-items:flex-start}.consent input{width:20px;height:20px;margin-top:2px;flex:0 0 auto}.consent label{font-size:.8rem;font-weight:400;color:var(--muted);line-height:1.35}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .submit{margin-top:18px;width:100%;border:0;background:var(--orange);color:#fff;font:inherit;font-weight:800;font-size:1.1rem;padding:15px;border-radius:12px;cursor:pointer;box-shadow:0 6px 18px rgba(254,82,1,.35)}
 .submit:focus-visible,.lang:focus-visible,.callmini:focus-visible,.bigcall:focus-visible,.alt:focus-visible{outline:3px solid var(--green-dk);outline-offset:2px}
@@ -142,6 +143,11 @@ footer a{color:var(--green)}
       <textarea id="notes" name="notes" maxlength="800" data-i18n-ph="phNotes" placeholder="e.g. AC blowing warm air, 2-story home…"></textarea>
     </div>
 
+    <div class="fld consent" data-f="consent">
+      <input id="consent" name="consent" type="checkbox" value="yes">
+      <label for="consent" id="consentLabel" data-i18n="consent">Yes, Circular Air Cooling &amp; Heating may call or text me at the number above about my quote, including with automated technology. Consent is not required to get a quote. Msg &amp; data rates may apply. Reply STOP to opt out.</label>
+    </div>
+
     <div class="hp" aria-hidden="true"><label for="website">Website</label><input id="website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
 
     <button class="submit" type="submit" id="go" data-i18n="go">Get My Free Quote</button>
@@ -177,7 +183,7 @@ price:"Sistemas de A/C nuevos desde <strong>$6,499*</strong>",lName:"Nombre",eNa
 lNeed:"¿Qué necesita?",n1:"Sistema nuevo / reemplazo",n2:"Reparación",n3:"Mantenimiento",n4:"Otro",eNeed:"Por favor elija una opción.",lAge:"¿Qué edad tiene su sistema actual?",optional:"(opcional)",aPick:"Seleccione…",
 a1:"0–5 años",a2:"6–10 años",a3:"11–15 años",a4:"Más de 15 años",a5:"No sé",a6:"No tengo sistema",lTime:"Mejor hora para llamarle",b1:"Lo antes posible",b2:"Mañana (8–12)",b3:"Tarde (12–5)",b4:"Noche (5–8)",eTime:"Por favor elija una hora.",
 lNotes:"Notas",phNotes:"Ej.: el A/C sopla aire caliente, casa de 2 pisos…",go:"Quiero mi cotización gratis",privacy:"Solo usamos sus datos para contactarle sobre su cotización. Sin spam.",orCall:"¿Prefiere hablar ahora?",fine:"*El precio varía según el tamaño de la casa y el sistema.",
-thxH:"¡Gracias!",thx:"Nuestro equipo le llamará pronto. ¿Nos necesita ya? Llame al <a href=\"tel:+14072888281\">407-288-8281</a>.",callNow:"📞 Llamar 407-288-8281",failH:"Casi listo",fail:"No pudimos enviar el formulario ahora. Llámenos o envíenos un texto y le atendemos.",textUs:"💬 Envíenos sus datos por texto"};
+thxH:"¡Gracias!",thx:"Nuestro equipo le llamará pronto. ¿Nos necesita ya? Llame al <a href=\"tel:+14072888281\">407-288-8281</a>.",callNow:"📞 Llamar 407-288-8281",failH:"Casi listo",fail:"No pudimos enviar el formulario ahora. Llámenos o envíenos un texto y le atendemos.",textUs:"💬 Envíenos sus datos por texto",consent:"Sí, Circular Air Cooling &amp; Heating puede llamarme o enviarme textos al número de arriba sobre mi cotización, incluso con tecnología automatizada. No se requiere consentimiento para obtener una cotización. Pueden aplicar tarifas de mensajes y datos. Responda STOP para cancelar."};
 var EN={},lang="en",nodes=document.querySelectorAll("[data-i18n]");
 nodes.forEach(function(n){EN[n.getAttribute("data-i18n")]=n.innerHTML});
 var ta=document.getElementById("notes");EN.phNotes=ta.placeholder;
@@ -202,9 +208,12 @@ function smsBody(p){return "Free AC quote request\nName: "+p.name+"\nPhone: "+p.
 f.addEventListener("submit",function(ev){ev.preventDefault();
   if(val("website"))return show("done"); // bot honeypot
   if(!validate())return;
+  var cb=document.getElementById("consent");
   var p={name:val("name"),phone:val("phone"),location:val("location"),need:need(),age:val("age"),bestTime:val("bestTime"),notes:val("notes"),lang:lang,
     page:location.href.split("#")[0],referrer:document.referrer||"",utm_source:qs.get("utm_source")||"",utm_medium:qs.get("utm_medium")||"",utm_campaign:qs.get("utm_campaign")||"",utm_content:qs.get("utm_content")||"",fbclid:qs.get("fbclid")?"yes":"",
-    secondsOnPage:Math.round((Date.now()-started)/1000),website:"",id:sid};
+    secondsOnPage:Math.round((Date.now()-started)/1000),website:"",id:sid,
+    // R-030: consent is true only if the box is ticked; send the exact wording shown + client time.
+    consent:cb.checked===true,consentText:document.getElementById("consentLabel").textContent.trim(),consentAt:cb.checked?new Date().toISOString():""};
   document.getElementById("smsLink").href="sms:+14072888281?&body="+encodeURIComponent(smsBody(p));
   // Email (FormSubmit) is first-class. Thank-you shows only if that post succeeds.
   // Apps Script is optional and extra: it runs when LEAD_FORM_ENDPOINT is set, and never decides the screen.
@@ -225,6 +234,7 @@ f.addEventListener("submit",function(ev){ev.preventDefault();
     Source:"Website form", utm_campaign:p.utm_campaign||"", utm_source:p.utm_source||"",
     utm_medium:p.utm_medium||"", utm_content:p.utm_content||"", "From FB click?":p.fbclid||"",
     Page:p.page, Referrer:p.referrer||"", "Seconds on page":String(p.secondsOnPage), "Submission ID":p.id,
+    "Call/text consent":p.consent?"YES (ticked) "+p.consentAt:"NO (not ticked)", "Consent wording shown":p.consentText,
     _subject:"New Circular Air quote request — "+p.name, _template:"table", _captcha:"false", _honey:"", _cc:"info@circularairfl.com,Osirisenergyinc@gmail.com"
   };
   var ctl=window.AbortController?new AbortController():null,tmr=setTimeout(function(){if(ctl)ctl.abort()},15000);

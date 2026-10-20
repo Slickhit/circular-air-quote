@@ -37,6 +37,8 @@ const ss = {
   getSpreadsheetTimeZone: () => 'America/New_York',
 };
 // Circular Air expects an existing "Leads" tab (15 columns) in the tracker.
+// GAS_RAW_HEADERS='[...]' pre-creates a Form Leads tab with that header row (header-migration test).
+if (process.env.GAS_RAW_HEADERS) ss.insertSheet('Form Leads').rows.push(JSON.parse(process.env.GAS_RAW_HEADERS));
 if (process.env.GAS_SHEETS) JSON.parse(process.env.GAS_SHEETS).forEach((n) => ss.insertSheet(n));
 
 const pad = (n) => String(n).padStart(2, '0');
