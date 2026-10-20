@@ -63,7 +63,8 @@ Everything else can be run by an agent on the box once the RAF steps are done.
 ## Later code changes
 
 Run `push`, then `create-version`, then `update-deployment <DEPLOYMENT_ID>`, so the `/exec` URL
-stays the same.
+stays the same. If `oauthScopes` in `appsscript.json` changed (R-030 pinned it to `spreadsheets`),
+**RAF re-authorizes once** after redeploying, same as step 6.
 
 ## Offline check (no Google needed)
 
