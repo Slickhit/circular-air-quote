@@ -30,3 +30,7 @@ Notes
 ## If something goes wrong
 - **No row appears:** check that the deployment's access is **Anyone** (not "Anyone with Google account"), and that you pasted the `/exec` URL, not `/dev`.
 - **Turn it off:** set line 3 of `config.js` back to `""`. Leads keep arriving by email.
+
+## Permissions (R-030)
+
+`apps-script/appsscript.json` pins `oauthScopes` to `https://www.googleapis.com/auth/spreadsheets` only (the code uses SpreadsheetApp and LockService; LockService needs no scope). After redeploying a version with this manifest, **Raf re-authorizes once**: run `testSubmit` in the editor and click **Allow**. If you add MailApp or another service later, add its scope to the manifest too.
